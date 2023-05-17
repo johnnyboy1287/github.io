@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>JavaScript Functions</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 8px;
+      border: 1px solid black;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>JavaScript Functions</h1>
+
+  <label for="wordInput">Enter a word to reverse:</label>
+  <input type="text" id="wordInput">
+  <button onclick="reverseWord()">Reverse Word</button>
+  <div id="reverseWordOutput"></div>
+
+  <label for="numberInput">Enter a number to generate the multiplication table:</label>
+  <input type="number" id="numberInput">
+  <button onclick="generateMultiplicationTable()">Generate Multiplication Table</button>
+  <div id="multiplicationTableOutput"></div>
+
+  <h2>Presidents Data</h2>
+  <div id="presidentsTable"></div>
+
+  <label for="presidentName">Enter a president's name to get details:</label>
+  <input type="text" id="presidentName">
+  <button onclick="getPresidentDetails()">Get Details</button>
+  <div id="presidentDetailsOutput"></div>
+
+  <script>
+    // Function to reverse a word
+    function reverseWord() {
+      var word = document.getElementById("wordInput").value;
+      var reversed = "";
+
+      for (var i = word.length - 1; i >= 0; i--) {
+        reversed += word[i];
+      }
+
+      document.getElementById("reverseWordOutput").textContent = "Reversed word: " + reversed;
+    }
+
+    // Function to generate a multiplication table
+    function generateMultiplicationTable() {
+      var number = parseInt(document.getElementById("numberInput").value);
+
+      var table = "<table>";
+
+      for (var i = 1; i <= 20; i++) {
+        if ((i - 1) % 5 === 0) {
+          table += "<tr>";
+        }
+        var result = number * i;
+        table += "<td>" + result + "</td>";
+        if (i % 5 === 0) {
+          table += "</tr>";
+        }
+      }
+
+      table += "</table>";
+
+      document.getElementById("multiplicationTableOutput").innerHTML = table;
+    }
+
+    // Load the presidents.csv data and display it as an HTML table
+    function loadPresidentsData() {
+      d3.csv("https://raw.githubusercontent.com/charleyferrari/CUNY_DATA_608/master/module5/data/presidents.csv")
+        .then(function (data) {
+          var columns = Object.keys(data[0]);
+
+          var table = d3.select("#presidentsTable").append("table");
+          var thead = table.append("thead");
+          var tbody = table.append("tbody");
+
+          // Append the table headers
+          thead.append("tr")
+            .selectAll("th")
+            .data(columns)
+            .enter()
+            .append("th")
+            .text(function (d) { return d; });
+
+          // Append the table rows
+          var rows = tbody.selectAll("tr")
+            .data(data)
+            .enter()
+            .append("tr");
+
+          // Append the table cells
+          var cells = rows.selectAll("td")
+            .data(function (row) {
+              return columns.map(function (column) {
+                return { column: column,                value: row[column] };
+              });
+            })
+            .enter()
+            .append("td")
+            .text(function (d) { return d.value; });
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+
+   // Retrieve the height and weight of a specific president
+    function getPresidentDetails() {
+      var presidentName = document.getElementById("presidentName").value;
+
+      d3.csv("https://raw.githubusercontent.com/charleyferrari/CUNY_DATA_608/master/module5/data/presidents.csv")
+        .then(function (data) {
+          var president = data.find(function (d) {
+            return d["President"].toLowerCase() === presidentName.toLowerCase();
+          });
+
+          if (president) {
+            var result = "Name: " + president["President"] + "<br>";
+            result += "Height: " + president["Height"] + "<br>";
+            result += "Weight: " + president["Weight"] + "<br>";
+
+            document.getElementById("presidentDetailsOutput").innerHTML = result;
+          } else {
+            document.getElementById("presidentDetailsOutput").innerHTML = "President not found.";
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+
+    // Call the loadPresidentsData function to display the data as an HTML table
+    loadPresidentsData();
+  </script>
+</body>
+
+</html>
+
